@@ -3,6 +3,7 @@ import time
 import numpy as np
 import tensorflow as tf
 
+import q1_softmax
 from q1_softmax import softmax
 from q1_softmax import cross_entropy_loss
 from model import Model
@@ -42,9 +43,12 @@ class SoftmaxModel(Model):
 
         Add these placeholders to self as the instance variables
             self.input_placeholder
+            
             self.labels_placeholder
         """
         ### YOUR CODE HERE
+        self.input_placeholder=tf.placeholder(shape=[Config.batch_size,Config.n_features],dtype=tf.float32)
+        self.labels_placeholder=tf.placeholder(shape=[Config.batch_size,Config.n_classes],dtype=tf.int32)
         ### END YOUR CODE
 
     def create_feed_dict(self, inputs_batch, labels_batch=None):
@@ -68,6 +72,10 @@ class SoftmaxModel(Model):
             feed_dict: The feed dictionary mapping from placeholders to values.
         """
         ### YOUR CODE HERE
+        if(labels_batch.all()== None):
+            feed_dict = {self.input_placeholder: inputs_batch}
+        else:
+            feed_dict={self.input_placeholder:inputs_batch,self.labels_placeholder:labels_batch}
         ### END YOUR CODE
         return feed_dict
 
@@ -88,6 +96,10 @@ class SoftmaxModel(Model):
             pred: A tensor of shape (batch_size, n_classes)
         """
         ### YOUR CODE HERE
+        W=tf.Variable(initial_value=tf.zeros(shape=[Config.n_features,Config.n_classes]))
+        b=tf.Variable(initial_value=tf.zeros([Config.n_classes]))
+        y=tf.add(tf.matmul(self.input_placeholder,W),b)
+        pred=q1_softmax.softmax(y)
         ### END YOUR CODE
         return pred
 
@@ -102,6 +114,7 @@ class SoftmaxModel(Model):
             loss: A 0-d tensor (scalar)
         """
         ### YOUR CODE HERE
+        loss=cross_entropy_loss(self.labels_placeholder,pred)
         ### END YOUR CODE
         return loss
 
@@ -125,6 +138,7 @@ class SoftmaxModel(Model):
             train_op: The Op for training.
         """
         ### YOUR CODE HERE
+        train_op=tf.train.GradientDescentOptimizer(Config.lr).minimize(loss)
         ### END YOUR CODE
         return train_op
 
@@ -159,7 +173,7 @@ class SoftmaxModel(Model):
             start_time = time.time()
             average_loss = self.run_epoch(sess, inputs, labels)
             duration = time.time() - start_time
-            print 'Epoch {:}: loss = {:.2f} ({:.3f} sec)'.format(epoch, average_loss, duration)
+            print('Epoch {:}: loss = {:.2f} ({:.3f} sec)'.format(epoch, average_loss, duration))
             losses.append(average_loss)
         return losses
 

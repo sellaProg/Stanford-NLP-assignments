@@ -25,7 +25,10 @@ def softmax(x):
 
     ### YOUR CODE HERE
 
-    out=tf.exp(x)/tf.reduce_sum(tf.exp(x),axis=0);
+    out1=tf.exp(x)
+    out2=tf.reduce_sum(out1,axis=1,keep_dims=True);
+    out=out1/out2
+
     ### END YOUR CODE
 
     return out
