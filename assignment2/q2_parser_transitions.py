@@ -81,8 +81,17 @@ def minibatch_parse(sentences, model, batch_size):
     """
 
     ### YOUR CODE HERE
-    
 
+    partial_parses = [PartialParse(s) for s in sentences]
+    pat = partial_parses[:]
+
+    while pat:
+        transitions = model.predict(pat)
+        for i in range(len(pat)):
+            pat[i].parse_step(transitions[i])
+        pat = [pp for pp in pat if not (len(pp.stack) == 1 and len(pp.buffer) == 0)]
+
+    dependencies = [fp.dependencies for fp in partial_parses]
 
     ### END YOUR CODE
 
